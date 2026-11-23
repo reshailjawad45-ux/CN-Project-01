@@ -1,0 +1,18 @@
+# Python virtual environment
+backend/venv/
+
+# Secret files
+.env
+.env.*
+!.env.example
+*.key
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local database
+*.db
+*.sqlite3
+
+backend/body.json
