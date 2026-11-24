@@ -1,6 +1,9 @@
 from flask import Blueprint,request,jsonify
 from app import db,bcrypt
 from models import User
+import jwt
+from datetime import datetime, timedelta, timezone
+from flask import current_app
 
 auth_bp =Blueprint("auth",__name__)
 @auth_bp.route("/register",methods=["POST"])
@@ -90,7 +93,17 @@ def login():
             "error": "Invalid username or password"
         }),401
         
-    return jsonify({
+    token=jwt.encode(
+        {
+            "sub": str(user.id),
+            "role": user.role,
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=15)
+        },
+        current_app.config["JWT_SECRET"],
+        algorithm="HS256"
+    )
+    
+    responce=jsonify({
         "success": True,
         "data": {
             "id": user.id,
@@ -98,4 +111,17 @@ def login():
             "role": user.role
         },
         "error": None
-    }), 200
+    })
+    
+    
+    responce.set_cookie(
+        "access_token",
+        token,
+        httponly=True,
+        secure=current_app.config["COOKIE_SECURE"],
+        samesite="Lax",
+        max_age=900,
+        path="/"
+    )
+    
+    return responce,200

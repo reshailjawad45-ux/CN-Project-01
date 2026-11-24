@@ -1,0 +1,13 @@
+[Unit]
+Description=Lab backend API
+After=network.target postgresql.service
+
+[Service]
+User=REPLACE_VM_USERNAME
+WorkingDirectory=/opt/backend
+EnvironmentFile=/etc/lab/app.env
+ExecStart=/opt/backend/venv/bin/gunicorn -w 2 -b 192.168.53.20:8000 "app:create_app()"
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
