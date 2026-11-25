@@ -18,3 +18,8 @@ __pycache__/
 backend/body.json
 backend/change.json
 backend/cookies.txt
+backend/record.json
+
+backend/admin_login.json
+backend/admin_cookies.txt
+backend/record.json

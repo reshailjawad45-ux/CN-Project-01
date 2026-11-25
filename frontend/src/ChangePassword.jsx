@@ -1,77 +1,134 @@
 
 import { useState } from "react";
 
-function ChangePassword() {
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+export default function ChangePassword() {
+  const [form, setForm] = useState({
+    old_password: "",
+    new_password: "",
+    confirm_password: "",
+  });
+
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleChangePassword(e) {
-    e.preventDefault();
+  function handleChange(event) {
+    const { name, value } = event.target;
 
-    if (newPassword.length < 8) {
-      setMessage("Password must be at least 8 characters.");
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    setMessage("");
+    setError("");
+
+    if (form.new_password.length < 8) {
+      setError("New password must be at least 8 characters.");
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setMessage("New passwords do not match.");
+    if (form.new_password !== form.confirm_password) {
+      setError("New passwords do not match.");
       return;
     }
 
-    if (oldPassword === newPassword) {
-      setMessage("New password must be different.");
-      return;
-    }
+    setLoading(true);
 
-    setMessage("Form validated. Backend connection pending.");
+    try {
+      const response = await fetch(
+        "/api/v1/auth/change-password",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            old_password: form.old_password,
+            new_password: form.new_password,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error || `HTTP ${response.status}`
+        );
+      }
+
+      setMessage(
+        "Password changed successfully! Please log in again."
+      );
+
+      setForm({
+        old_password: "",
+        new_password: "",
+        confirm_password: "",
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div>
-      <h1>Change Password</h1>
+    <div style={{ padding: "20px" }}>
+      <h2>Change Password</h2>
 
-      <p>Preview only — password changes are not saved yet.</p>
+      {error && (
+        <p style={{ color: "red" }}>{error}</p>
+      )}
 
-      <form onSubmit={handleChangePassword}>
+      {message && (
+        <p style={{ color: "green" }}>{message}</p>
+      )}
+
+      <form onSubmit={handleSubmit}>
         <div>
-          <label>Current Password</label>
           <input
             type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
+            name="old_password"
+            placeholder="Current Password"
+            value={form.old_password}
+            onChange={handleChange}
             required
           />
         </div>
 
         <div>
-          <label>New Password</label>
           <input
             type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            minLength={8}
+            name="new_password"
+            placeholder="New Password"
+            value={form.new_password}
+            onChange={handleChange}
             required
           />
         </div>
 
         <div>
-          <label>Confirm New Password</label>
           <input
             type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            name="confirm_password"
+            placeholder="Confirm New Password"
+            value={form.confirm_password}
+            onChange={handleChange}
             required
           />
         </div>
 
-        <button type="submit">Change Password</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Changing..." : "Change Password"}
+        </button>
       </form>
-
-      <p>{message}</p>
     </div>
   );
 }
-
-export default ChangePassword;

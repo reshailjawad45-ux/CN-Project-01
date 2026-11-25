@@ -1,76 +1,250 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-function Records() {
-  const [name, setName] = useState("");
-  const [course, setCourse] = useState("");
-  const [phone, setPhone] = useState("");
+export default function Records() {
   const [records, setRecords] = useState([]);
+  const [form, setForm] = useState({
+    name: "",
+    course: "",
+    phone: "",
+  });
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  const [editingId, setEditingId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const newRecord = {
-      name: name,
-      course: course,
-      phone: phone
-    };
+  async function apiRequest(url, options = {}) {
+    const response = await fetch(url, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
 
-    setRecords([...records, newRecord]);
+    const result = await response.json();
 
-    setName("");
-    setCourse("");
-    setPhone("");
+    if (!response.ok) {
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+
+    return result;
+  }
+
+  async function loadRecords() {
+    try {
+      setError("");
+
+      const result = await apiRequest("/api/v1/records");
+
+      setRecords(result.data);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  useEffect(() => {
+    loadRecords();
+  }, []);
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    setError("");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const url =
+        editingId === null
+          ? "/api/v1/records"
+          : `/api/v1/records/${editingId}`;
+
+      const method = editingId === null ? "POST" : "PUT";
+
+      await apiRequest(url, {
+        method,
+        body: JSON.stringify(form),
+      });
+
+      setMessage(
+        editingId === null
+          ? "Record created successfully!"
+          : "Record updated successfully!"
+      );
+
+      setForm({
+        name: "",
+        course: "",
+        phone: "",
+      });
+
+      setEditingId(null);
+
+      await loadRecords();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleEdit(record) {
+    setEditingId(record.id);
+
+    setForm({
+      name: record.name,
+      course: record.course,
+      phone: record.phone,
+    });
+
+    setMessage("");
+    setError("");
+  }
+
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this record?")) {
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setLoading(true);
+
+    try {
+      await apiRequest(`/api/v1/records/${id}`, {
+        method: "DELETE",
+      });
+
+      setMessage("Record deleted successfully!");
+
+      if (editingId === id) {
+        setEditingId(null);
+        setForm({ name: "", course: "", phone: "" });
+      }
+
+      await loadRecords();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div>
-      <h1>Student Records</h1>
+    <div style={{ padding: "20px" }}>
+      <h2>Student Records</h2>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {message && (
+        <p style={{ color: "green" }}>{message}</p>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Name</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            name="name"
+            placeholder="Student Name"
+            value={form.name}
+            onChange={handleChange}
             required
+            maxLength={100}
           />
         </div>
 
         <div>
-          <label>Course</label>
           <input
             type="text"
-            value={course}
-            onChange={(e) => setCourse(e.target.value)}
+            name="course"
+            placeholder="Course"
+            value={form.course}
+            onChange={handleChange}
             required
+            maxLength={100}
           />
         </div>
 
         <div>
-          <label>Phone</label>
           <input
             type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            name="phone"
+            placeholder="Phone Number"
+            value={form.phone}
+            onChange={handleChange}
             required
+            maxLength={30}
           />
         </div>
 
-        <button type="submit">Add Record</button>
+        <button type="submit" disabled={loading}>
+          {editingId === null
+            ? "Create Record"
+            : "Update Record"}
+        </button>
+
+        {editingId !== null && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingId(null);
+              setForm({ name: "", course: "", phone: "" });
+            }}
+          >
+            Cancel Edit
+          </button>
+        )}
       </form>
 
-      <h2>Records List</h2>
-      <p>Local preview only — not saved to database yet.</p>
+      <hr />
+
+      <h3>My Records</h3>
 
       {records.length === 0 ? (
-        <p>No records added yet.</p>
+        <p>No records found.</p>
       ) : (
         <ul>
-          {records.map((record, index) => (
-            <li key={index}>
-              {record.name} - {record.course} - {record.phone}
+          {records.map((record) => (
+            <li key={record.id}>
+              <p>
+                <strong>Name:</strong> {record.name}
+              </p>
+
+              <p>
+                <strong>Course:</strong> {record.course}
+              </p>
+
+              <p>
+                <strong>Phone:</strong> {record.phone}
+              </p>
+
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => handleEdit(record)}
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => handleDelete(record.id)}
+              >
+                Delete
+              </button>
             </li>
           ))}
         </ul>
@@ -78,5 +252,3 @@ function Records() {
     </div>
   );
 }
-
-export default Records;

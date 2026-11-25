@@ -5,6 +5,7 @@ from flask_bcrypt import Bcrypt
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.middleware.proxy_fix import ProxyFix
+
 from config import Config
 
 db=SQLAlchemy()
@@ -16,12 +17,12 @@ def create_app():
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
     db.init_app(app)
     bcrypt.init_app(app)
-    
+
     from routes.auth import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
-    
+
     @app.route("/api/v1/health", methods=["GET"])
-    
+
     def health():
         try:
             db.session.execute(text("SELECT 1"))
@@ -29,11 +30,36 @@ def create_app():
         except SQLAlchemyError:
             db.session.rollback()
             database_ok=False
-         
+
         return jsonify({
             "hostname": socket.gethostname(),
             "ip": app.config["LAB_IP"],
             "db": database_ok
         }), 200
-   
+
+    from routes.records import records_bp
+    app.register_blueprint(records_bp, url_prefix="/api/v1/records")
+    from routes.admin import admin_bp
+
+    app.register_blueprint(
+        admin_bp,
+        url_prefix="/api/v1/admin"
+    )
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "data": None,
+            "error": "Resource not found"
+        }),404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "data": None,
+            "error": "Internal server error"
+        }), 500
     return app

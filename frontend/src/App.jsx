@@ -8,6 +8,28 @@ import ChangePassword from "./ChangePassword";
 function App() {
   const [page, setPage] = useState("register");
 
+
+  async function handleLogout() {
+    try {
+      const response = await fetch("/api/v1/auth/logout", {
+        method: "POST",
+         credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+
+      window.location.href = "/";
+    } catch (error) {
+      alert(error.message);
+    }
+}
+
+
+
+
+
   return (
     <div>
       <nav>
@@ -26,6 +48,11 @@ function App() {
         <button onClick={() => setPage("changePassword")}>
           Change Password
         </button>
+
+        <button onClick={handleLogout}>
+          Logout
+        </button>
+
       </nav>
 
       {page === "register" && <Register />}
