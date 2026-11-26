@@ -60,3 +60,42 @@ This folder contains screenshots documenting the infrastructure setup, deploymen
 | bscs25053-docker | 192.168.53.30 | Docker environment |
 
 Further application integration and final testing will be documented as the project progresses.
+
+
+## Day 3 - 26 November 2026
+
+### Updated Application Deployment
+- Synchronized WEB and API VMs with the updated GitHub code (commit a8612d6).
+- Created backups of the existing backend and frontend.
+- Verified encryption key compatibility and Python dependencies.
+- Deployed the updated Flask backend and React frontend.
+- Verified PostgreSQL connectivity and NGINX configuration.
+
+### CRUD and Encryption Testing
+- Successful record creation (HTTP 201).
+- Successful record retrieval (HTTP 200).
+- Successful record update (HTTP 200).
+- Successful record deletion (HTTP 200).
+- Verified encrypted phone number storage in PostgreSQL and correct decryption in the frontend.
+
+### Role-Based Access Control (RBAC)
+- Unauthenticated access rejected (HTTP 401).
+- Normal student access to admin API rejected (HTTP 403).
+- Authorized admin access successful (HTTP 200).
+- Verified student and admin roles in PostgreSQL.
+
+### Authentication Testing
+- Successful password change.
+- Old password rejected.
+- New password accepted.
+- Successful logout and rejection of protected API access after logout.
+
+### Network and API Evidence
+- NGINX authentication and RBAC status codes.
+- NGINX CRUD request status codes.
+- NGINX password change and login verification.
+
+### Pending Observation
+- Previously loaded records remained visible in the frontend after an authentication failure. Backend access was correctly denied. Frontend session handling requires review by Partner B.
+
+A total of 16 evidence screenshots were collected for Day 3.
