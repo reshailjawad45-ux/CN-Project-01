@@ -23,3 +23,6 @@ backend/record.json
 backend/admin_login.json
 backend/admin_cookies.txt
 backend/record.json
+
+docker/.env
+docker/certs/

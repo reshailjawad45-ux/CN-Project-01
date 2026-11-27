@@ -24,11 +24,24 @@ export default function Records() {
       },
     });
 
+
     const result = await response.json();
 
-    if (!response.ok) {
-      throw new Error(result.error || `HTTP ${response.status}`);
+    if (response.status === 401) {
+        setRecords([]);
+        setEditingId(null);
+        setForm({
+          name: "",
+          course: "",
+          phone: "",
+        });
+        throw new Error("Session expired. Please log in again.");
     }
+
+    if (!response.ok) {
+        throw new Error(result.error || `HTTP ${response.status}`);
+    }
+
 
     return result;
   }
