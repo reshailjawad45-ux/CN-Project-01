@@ -95,6 +95,39 @@ Further application integration and final testing will be documented as the proj
 - NGINX CRUD request status codes.
 - NGINX password change and login verification.
 
+## Day 4 – TLS, Firewall and Application Security Verification
+
+**Date:** 27 November 2026  
+**Contributor:** Partner A (BSCS25053)
+
+### Completed Work
+
+- Verified REST API error responses (400, 401 and 404).
+- Verified corresponding NGINX status code logs.
+- Updated the TLS certificate with the required hostname and IP SAN entries.
+- Verified TLS 1.3, certificate trust and HTTPS connectivity.
+- Verified HTTP-to-HTTPS redirection.
+- Verified UFW rules on both WEB and API VMs.
+- Completed firewall connectivity tests.
+- Performed post-firewall Nmap scans from the Windows host.
+- Verified bcrypt password hashing.
+- Verified JWT cookie security flags and decoded JWT header and payload.
+- Verified backend service startup logs.
+- Compared encrypted database storage with decrypted frontend data.
+- Verified network addressing, routing, ARP tables, listening ports and bidirectional connectivity.
+
+### Firewall Configuration Evidence
+
+- `deploy/ufw/vm1_ufw.txt`
+- `deploy/ufw/vm2_ufw.txt`
+
+### Pending Work
+
+- Remaining TLS command evidence and pre-firewall scan evidence.
+- Backend HTTP access log evidence.
+- Docker application deployment and verification.
+- Network packet analysis and Break & Fix troubleshooting tasks.
+
 ### Pending Observation
 - Previously loaded records remained visible in the frontend after an authentication failure. Backend access was correctly denied. Frontend session handling requires review by Partner B.
 
