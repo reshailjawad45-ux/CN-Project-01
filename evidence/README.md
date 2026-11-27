@@ -115,6 +115,7 @@ Further application integration and final testing will be documented as the proj
 - Verified backend service startup logs.
 - Compared encrypted database storage with decrypted frontend data.
 - Verified network addressing, routing, ARP tables, listening ports and bidirectional connectivity.
+- Generated and verified the Docker VM TLS certificate with hostname and IP SAN entries, secured the private key, and saved a VM snapshot.
 
 ### Firewall Configuration Evidence
 
