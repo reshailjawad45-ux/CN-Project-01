@@ -133,3 +133,43 @@ Further application integration and final testing will be documented as the proj
 - Previously loaded records remained visible in the frontend after an authentication failure. Backend access was correctly denied. Frontend session handling requires review by Partner B.
 
 A total of 16 evidence screenshots were collected for Day 3.
+
+
+## Day 5 – Docker Deployment and Security Verification (28 November 2026)
+
+### Completed Tasks – Partner A (BSCS25053)
+
+- Successfully deployed NGINX, Flask API and PostgreSQL using Docker Compose on VM3 (192.168.53.30).
+- Verified container startup, database health and HTTPS API connectivity.
+- Configured certificate trust and hostname resolution on the Windows client.
+- Verified registration, login and complete CRUD operations.
+- Verified bcrypt password hashing and AES-encrypted database fields.
+- Verified JWT cookie security flags.
+- Tested role-based access control with HTTP 200, 401 and 403 responses.
+- Verified NGINX rate limiting with HTTP 429 responses and corresponding logs.
+- Confirmed that only HTTPS port 443 is published, while ports 80, 8000 and 5432 are inaccessible from the Windows client.
+- Verified internal Docker bridge networking and service-name resolution.
+- Successfully tested password change, old password rejection, new password login and logout.
+
+### Docker Network
+
+| Container | Internal IP | Service Name |
+|---|---|---|
+| NGINX | 172.18.0.4 | web |
+| Flask API | 172.18.0.3 | api |
+| PostgreSQL | 172.18.0.2 | db |
+
+Network: `lab-net` (bridge)
+
+Container IP addresses may change when containers are recreated. Internal communication uses Docker service names.
+
+### Security Notes
+
+- Only HTTPS port 443 is published externally.
+- Backend and database ports are not published.
+- Environment secrets and TLS private keys are stored locally and excluded from Git.
+- Security verification screenshots are available in the evidence directory.
+
+### Result
+
+Docker deployment and core application security tests completed successfully. Remaining network analysis, troubleshooting and final comparison documentation are pending.
